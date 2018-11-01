@@ -25,6 +25,10 @@ mv certs/servers/localhost/cert.pem /etc/loolwsd/cert.pem
 mv certs/ca/root.crt.pem /etc/loolwsd/ca-chain.cert.pem
 fi
 
+# If we've passed the $termination env variable, apply it - useful when behind an SSL-terminating reverse proxy like traefik
+[[ -z "${termination}" ]] && APPLY_TERMINATION='false' || APPLY_TERMINATION="${termination}"
+perl -pi -e "s/<termination (.*)>.*<\/termination>/<termination \1>${APPLY_TERMINATION}<\/termination>/" /etc/loolwsd/loolwsd.xml
+
 # Replace trusted host and set admin username and password
 perl -pi -e "s/localhost<\/host>/${domain}<\/host>/g" /etc/loolwsd/loolwsd.xml
 perl -pi -e "s/<username (.*)>.*<\/username>/<username \1>${username}<\/username>/" /etc/loolwsd/loolwsd.xml
